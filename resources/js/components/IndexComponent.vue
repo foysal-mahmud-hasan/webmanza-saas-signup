@@ -14,7 +14,8 @@ const formData = reactive({
     selectedTheme: null,
     tin: '',
     bin: '',
-    selectedPaymentPartner: null
+    selectedPaymentPartner: null,
+    selectedDeliveryPartner: null,
 })
 
 const errors = reactive({
@@ -22,7 +23,8 @@ const errors = reactive({
     selectedTheme: '',
     tin: '',
     bin: '',
-    selectedPaymentPartner: ''
+    selectedPaymentPartner: '',
+    selectedDeliveryPartner: ''
 })
 
 const themes = [
@@ -35,6 +37,11 @@ const themes = [
 ]
 
 const paymentPartners = [
+    { id: 1, src: "https://flowbite.s3.amazonaws.com/docs/gallery/square/image.jpg", alt: "Payment Partner 1" },
+    { id: 2, src: "https://flowbite.s3.amazonaws.com/docs/gallery/square/image-1.jpg", alt: "Payment Partner 2" },
+    { id: 3, src: "https://flowbite.s3.amazonaws.com/docs/gallery/square/image-2.jpg", alt: "Payment Partner 3" }
+]
+const deliveryPartners = [
     { id: 1, src: "https://flowbite.s3.amazonaws.com/docs/gallery/square/image.jpg", alt: "Payment Partner 1" },
     { id: 2, src: "https://flowbite.s3.amazonaws.com/docs/gallery/square/image-1.jpg", alt: "Payment Partner 2" },
     { id: 3, src: "https://flowbite.s3.amazonaws.com/docs/gallery/square/image-2.jpg", alt: "Payment Partner 3" }
@@ -75,11 +82,17 @@ const validateCurrentStep = () => {
         if (!formData.tin.trim()) {
             errors.tin = 'TIN is required';
             isValid = false;
+        } else if (isNaN(formData.tin)){
+            errors.tin = 'TIN must be a digit';
+            isValid = false;
         } else {
             errors.tin = '';
         }
         if (!formData.bin.trim()) {
             errors.bin = 'BIN is required';
+            isValid = false;
+        } else if (isNaN(formData.bin)){
+            errors.bin = 'BIN must be a digit';
             isValid = false;
         } else {
             errors.bin = '';
@@ -89,6 +102,12 @@ const validateCurrentStep = () => {
             isValid = false;
         } else {
             errors.selectedPaymentPartner = '';
+        }
+        if (formData.selectedDeliveryPartner === null) {
+            errors.selectedDeliveryPartner = 'Please select a delivery partner';
+            isValid = false;
+        } else {
+            errors.selectedDeliveryPartner = '';
         }
     }
 
@@ -109,6 +128,10 @@ const selectPaymentPartner = (partnerId) => {
     formData.selectedPaymentPartner = partnerId;
 };
 
+const selectDeliveryPartner = (deliverId) => {
+    formData.selectedDeliveryPartner = deliverId;
+};
+
 const isStepComplete = computed(() => {
     if (currentStep.value === 1) return !!formData.storeName.trim();
     if (currentStep.value === 2) return formData.selectedTheme !== null;
@@ -118,36 +141,25 @@ const isStepComplete = computed(() => {
 </script>
 
 <template>
-    <div class="flex items-center justify-center h-screen w-screen bg-gray-100">
-        <div class="w-1/2">
-            <div class="rounded-md shadow-md p-6 bg-black">
-                <ol
-                    class="flex items-center w-full text-sm font-medium text-center text-gray-500 dark:text-gray-400 sm:text-base">
-                    <li :class="{ 'text-blue-600': currentStep === 1 }" class="flex md:w-full items-center">
-                        <span class="flex items-center after:content-['/'] sm:after:hidden after:mx-2 after:text-gray-200 dark:after:text-gray-500">
-                            <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 me-2.5" aria-hidden="true"
-                                xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                                <path
-                                    d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z" />
-                            </svg>
-                            Store <span class="hidden sm:inline-flex sm:ms-2">Name</span>
+    <div class="flex flex-col min-h-screen justify-center items-center bg-gray-100">
+        <div class="w-full max-w-4xl px-4">
+            <div class="rounded-md shadow-md p-6">
+                <ol class="flex items-center w-full text-sm font-medium text-center text-gray-500 dark:text-gray-400 sm:text-base">
+                    <li v-for="step in totalSteps" :key="step" :class="{ 'text-blue-600': currentStep >= step }" class="flex md:w-full items-center justify-center">
+                        <span class="flex items-center after:content-['/'] md:after:hidden after:mx-2 after:text-gray-200 dark:after:text-gray-500">
+                            <span class="flex items-center">
+                                <svg v-if="currentStep > step" class="w-6 h-6 text-blue-600 dark:text-blue-500 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m5 12 4.7 4.5 9.3-9"/>
+                                </svg>
+                                <span v-else class="me-2">{{ step }}</span>
+                            </span>
+                            <span class="hidden md:inline-flex md:ms-2">
+                                <span v-if="step === 1">Store Name</span>
+                                <span v-if="step === 2">Theme Selection</span>
+                                <span v-if="step === 3">Store Setup</span>
+                                <span v-if="step === 4">Confirmation</span>
+                            </span>
                         </span>
-                    </li>
-                    <li :class="{ 'text-blue-600': currentStep === 2 }" class="flex md:w-full items-center">
-                        <span class="flex items-center after:content-['/'] sm:after:hidden after:mx-2 after:text-gray-200 dark:after:text-gray-500">
-                            <span class="me-2">2</span>
-                            Theme <span class="hidden sm:inline-flex sm:ms-2">Selection</span>
-                        </span>
-                    </li>
-                    <li :class="{ 'text-blue-600': currentStep === 3 }" class="flex md:w-full items-center">
-                        <span class="flex items-center after:content-['/'] sm:after:hidden after:mx-2 after:text-gray-200 dark:after:text-gray-500">
-                            <span class="me-2">3</span>
-                            Store <span class="hidden sm:inline-flex sm:ms-2">Setup</span>
-                        </span>
-                    </li>
-                    <li :class="{ 'text-blue-600': currentStep === 4 }" class="flex items-center">
-                        <span class="me-2">4</span>
-                        Confirmation
                     </li>
                 </ol>
 
@@ -161,9 +173,9 @@ const isStepComplete = computed(() => {
 
                     <div v-if="currentStep === 2">
                         <h3 class="mb-4 mt-4 text-lg font-medium leading-none text-gray-900 dark:text-white">Theme Selection</h3>
-                        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        <div class="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-3 gap-4">
                             <div v-for="theme in themes" :key="theme.id" class="relative">
-                                <img @click="selectTheme(theme.id)" :class="{ 'border-4 border-blue-500': formData.selectedTheme === theme.id }" class="h-auto max-w-full rounded-lg cursor-pointer" :src="theme.src" :alt="theme.alt">
+                                <img @click="selectTheme(theme.id)" :class="{ 'border-4 border-blue-500': formData.selectedTheme === theme.id }" class="h-32 md:h-40 w-full rounded-lg cursor-pointer object-cover" :src="theme.src" :alt="theme.alt">
                                 <svg v-if="formData.selectedTheme === theme.id" class="w-6 h-6 text-blue-600 dark:text-blue-500 absolute top-2 right-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m5 12 4.7 4.5 9.3-9"/>
                                 </svg>
@@ -183,15 +195,25 @@ const isStepComplete = computed(() => {
                         <p v-if="errors.bin" class="mt-2 text-sm text-red-600 dark:text-red-500">{{ errors.bin }}</p>
                         
                         <h4 class="mb-2 mt-4 text-sm font-medium text-gray-900 dark:text-white">Select Payment Partner</h4>
-                        <div class="grid grid-cols-3 gap-2 mt-2">
+                        <div class="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 mt-2">
                             <div v-for="partner in paymentPartners" :key="partner.id" class="relative">
-                                <img @click="selectPaymentPartner(partner.id)" :class="{ 'border-4 border-blue-500': formData.selectedPaymentPartner === partner.id }" class="h-auto max-w-full rounded-lg cursor-pointer" :src="partner.src" :alt="partner.alt">
+                                <img @click="selectPaymentPartner(partner.id)" :class="{ 'border-4 border-blue-500': formData.selectedPaymentPartner === partner.id }" class="h-32 md:h-40 w-full rounded-lg cursor-pointer object-cover" :src="partner.src" :alt="partner.alt">
                                 <svg v-if="formData.selectedPaymentPartner === partner.id" class="w-6 h-6 text-blue-600 dark:text-blue-500 absolute top-2 right-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m5 12 4.7 4.5 9.3-9"/>
                                 </svg>
                             </div>
                         </div>
                         <p v-if="errors.selectedPaymentPartner" class="mt-2 text-sm text-red-600 dark:text-red-500">{{ errors.selectedPaymentPartner }}</p>
+                        <h4 class="mb-2 mt-4 text-sm font-medium text-gray-900 dark:text-white">Select Delivery Partner</h4>
+                        <div class="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 mt-2">
+                            <div v-for="delivery in deliveryPartners" :key="delivery.id" class="relative">
+                                <img @click="selectDeliveryPartner(delivery.id)" :class="{ 'border-4 border-blue-500': formData.selectedDeliveryPartner === delivery.id }" class="h-32 md:h-40 w-full rounded-lg cursor-pointer object-cover" :src="delivery.src" :alt="delivery.alt">
+                                <svg v-if="formData.selectedDeliveryPartner === delivery.id" class="w-6 h-6 text-blue-600 dark:text-blue-500 absolute top-2 right-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m5 12 4.7 4.5 9.3-9"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <p v-if="errors.selectedDeliveryPartner" class="mt-2 text-sm text-red-600 dark:text-red-500">{{ errors.selectedDeliveryPartner }}</p>
                     </div>
 
                     <div v-if="currentStep === 4">
@@ -203,6 +225,7 @@ const isStepComplete = computed(() => {
                             <p><strong>TIN Number:</strong> {{ formData.tin }}</p>
                             <p><strong>BIN Number:</strong> {{ formData.bin }}</p>
                             <p><strong>Selected Payment Partner:</strong> Payment Partner {{ formData.selectedPaymentPartner }}</p>
+                            <p><strong>Selected Delivery Partner:</strong> Delivery Partner {{ formData.selectedDeliveryPartner }}</p>
                         </div>
                     </div>
 
@@ -226,4 +249,7 @@ const isStepComplete = computed(() => {
 
 <style>
 @import 'flowbite/dist/flowbite.css';
+img {
+    object-fit: cover; /* Ensure images cover the container without distortion */
+}
 </style>

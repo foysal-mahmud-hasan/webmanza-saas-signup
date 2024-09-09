@@ -4,45 +4,28 @@ const colors = require('tailwindcss/colors')
 
 module.exports = {
   content: [
-    './index.html',
-    './src/**/*.{vue,js,ts,jsx,tsx}', // Adjust paths as needed
-    'node_modules/flowbite/**/*.js', // Add this line
+    './resources/**/*.blade.php', // Target all Blade templates
+    './resources/js/**/*.vue',    // Target all Vue components
   ],
   theme: {
-    spacing: {
-
-    },
-    screens: {
-      sm: '480px',
-      md: '768px',
-      lg: '976px',
-      xl: '1440px',
-    },
-    colors: {
-      gray: colors.coolGray,
-      blue: colors.lightBlue,
-      red: colors.rose,
-      pink: colors.fuchsia,
-    },
-    fontFamily: {
-      sans: ['Graphik', 'sans-serif'],
-      serif: ['Merriweather', 'serif'],
-    },
     extend: {
-
+      colors: {
+        gray: colors.gray, // Updated from 'coolGray'
+        blue: colors.sky,  // Updated from 'lightBlue'
+        red: colors.rose,
+        pink: colors.fuchsia,
+      },
+      fontFamily: {
+        sans: ['Graphik', 'sans-serif'],
+        serif: ['Merriweather', 'serif'],
+      }
     },
     container: {
       center: true,
-      padding: {
-
-      },
+      padding: '1rem', // Specify default padding for containers
     },
   },
   plugins: [
-    require('flowbite/plugin')({
-      charts: true,
-      forms: true,
-      tooltips: true
-    }),
-  ]
+    require('flowbite/plugin'), // Assuming usage of Flowbite components
+  ],
 };
