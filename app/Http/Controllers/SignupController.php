@@ -20,6 +20,6 @@ class SignupController extends Controller
         $query->payment_partner_id = $request->payment_partner_id;
         $query->Save();
 
-        return response() ->json(['message' => "Succses"]);
+        return response()->json(['message' => "Succses"]);
     }
 }
